@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Nexus Game</title>
+    <!-- ПРЯМАЯ ССЫЛКА НА ВК БРИДЖ -->
+    <script src="https://unpkg.com"></script>
+    <style>
+        body { margin: 0; background: #0a0a0c; color: white; font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; overflow: hidden; }
+        .card { background: #1a1a1e; border-radius: 24px; padding: 40px 20px; border: 1px solid #333; width: 85%; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        #user-name { color: #00f2ff; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }
+        .balance { font-size: 48px; font-weight: 900; margin: 20px 0; text-shadow: 0 0 20px rgba(0,119,255,0.5); color: #fff; }
+        .btn { background: linear-gradient(45deg, #0077ff, #00f2ff); color: white; border: none; padding: 18px; width: 100%; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,119,255,0.3); }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="user-name">СВЯЗЬ С СЕТЬЮ...</div>
+    <div class="balance" id="money">0 🪙</div>
+    <button class="btn" onclick="addMoney()">МАЙНИТЬ 🪙</button>
+</div>
+
+<script>
+    function init() {
+        if (typeof vkBridge !== 'undefined') {
+            vkBridge.send("VKWebAppInit");
+            vkBridge.send("VKWebAppGetUserInfo").then(data => {
+                if (data.first_name) {
+                    document.getElementById('user-name').innerText = data.first_name + ' ' + (data.last_name || '');
+                }
+            }).catch(e => console.log(e));
+        } else {
+            setTimeout(init, 100);
+        }
+    }
+    init();
+
+    let b = 0;
+    function addMoney() {
+        b += 100;
+        document.getElementById('money').innerText = b.toLocaleString() + " 🪙";
+        if (typeof vkBridge !== 'undefined') {
+            vkBridge.send("VKWebAppTapticImpactOccurred", {"style": "light"});
+        }
+    }
+</script>
+
+</body>
+</html>
