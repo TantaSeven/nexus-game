@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Nexus Game</title>
-    <!-- ИСПРАВЛЕННАЯ ССЫЛКА НА БИБЛИОТЕКУ (Теперь полная) -->
+    <!-- 1. Подключаем мост по официальной ссылке -->
     <script src="https://unpkg.com"></script>
     <style>
         body { margin: 0; background: #0a0a0c; color: white; font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; overflow: hidden; }
@@ -18,50 +18,49 @@
 <body>
 
 <div class="card">
-    <div id="user-name">ОЖИДАНИЕ СЕТИ...</div>
+    <div id="user-name">ПОДКЛЮЧЕНИЕ К VK...</div>
     <div class="balance" id="money">0 🪙</div>
     <button class="btn" onclick="addMoney()">МАЙНИТЬ 🪙</button>
 </div>
 
 <script>
-    // Объединяем твой код и логику из скриншота
+    // Функция запуска из раздела "Getting Started"
     function initApp() {
         if (typeof vkBridge !== 'undefined') {
-            // Как на твоем скриншоте: отправляем Init и ждем ответа (.then)
+            // Отправляем Init — самое важное событие
             vkBridge.send("VKWebAppInit")
                 .then((data) => {
                     if (data.result) {
-                        console.log("Инициализация успешна!");
-                        document.getElementById('user-name').innerText = "СВЯЗЬ УСТАНОВЛЕНА";
-
-                        // Только после успешного Init запрашиваем имя
+                        console.log("VK Bridge инициализирован");
+                        // После успеха сразу просим данные пользователя
                         return vkBridge.send("VKWebAppGetUserInfo");
                     }
                 })
-                .then((userData) => {
-                    if (userData && userData.first_name) {
-                        document.getElementById('user-name').innerText = userData.first_name + ' ' + (userData.last_name || '');
+                .then((user) => {
+                    if (user && user.first_name) {
+                        document.getElementById('user-name').innerText = user.first_name + ' ' + (user.last_name || '');
                     }
                 })
                 .catch((error) => {
-                    console.error("Ошибка:", error);
-                    document.getElementById('user-name').innerText = "ОШИБКА СВЯЗИ";
+                    console.error("Ошибка инициализации:", error);
+                    document.getElementById('user-name').innerText = "ОШИБКА ДОСТУПА";
                 });
         } else {
-            // Библиотека еще грузится, ждем...
+            // Если библиотека еще не подгрузилась, ждем чуть-чуть
             setTimeout(initApp, 100);
         }
     }
 
-    // Запуск
+    // Запускаем всё
     initApp();
 
-    let b = 0;
+    // Логика майнинга
+    let balance = 0;
     function addMoney() {
-        b += 100;
-        document.getElementById('money').innerText = b.toLocaleString() + " 🪙";
+        balance += 100;
+        document.getElementById('money').innerText = balance.toLocaleString() + " 🪙";
         
-        // Вибрация, если библиотека доступна
+        // Вибрация (тоже через Bridge)
         if (typeof vkBridge !== 'undefined') {
             vkBridge.send("VKWebAppTapticImpactOccurred", {"style": "light"});
         }
